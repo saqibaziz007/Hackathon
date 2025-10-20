@@ -11,7 +11,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// DOM Elements for THIS page
+// DOM Elements
 const loginForm = document.getElementById('login-form');
 const registerForm = document.getElementById('register-form');
 const loginFormElement = document.getElementById('loginForm');
@@ -25,161 +25,132 @@ const registerError = document.getElementById('register-error');
 const loginLoading = document.getElementById('login-loading');
 const registerLoading = document.getElementById('register-loading');
 
-// Show register form
+function fadeSwitch(hideEl, showEl) {
+  hideEl.classList.remove('fade-in');
+  hideEl.style.display = 'none';
+  showEl.style.display = 'block';
+  showEl.classList.add('fade-in');
+}
+
+// Show signup form
 showRegisterLink.addEventListener('click', () => {
-    loginForm.style.display = 'none';
-    registerForm.style.display = 'block';
-    hideAllMessages();
+  fadeSwitch(loginForm, registerForm);
+  hideAllMessages();
 });
 
 // Show login form
 showLoginLink.addEventListener('click', () => {
-    registerForm.style.display = 'none';
-    loginForm.style.display = 'block';
-    hideAllMessages();
+  fadeSwitch(registerForm, loginForm);
+  hideAllMessages();
 });
 
-// Hide all global messages
+// Hide messages
 function hideAllMessages() {
-    if (logoutSuccess) logoutSuccess.style.display = 'none';
-    if (registerSuccess) registerSuccess.style.display = 'none';
-    if (loginError) loginError.style.display = 'none';
-    if (registerError) registerError.style.display = 'none';
+  [logoutSuccess, registerSuccess, loginError, registerError].forEach((el) => {
+    if (el) el.style.display = 'none';
+  });
 }
 
-// Login form validation and submission
+// Login form
 loginFormElement.addEventListener('submit', (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const emailError = document.getElementById('email-error');
-    const passwordError = document.getElementById('password-error');
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const emailError = document.getElementById('email-error');
+  const passwordError = document.getElementById('password-error');
 
-    let isValid = true;
+  let isValid = true;
 
-    // Validate email
-    if (email === '') {
-        emailError.style.display = 'block';
-        isValid = false;
-    } else {
-        emailError.style.display = 'none';
-    }
+  if (email === '') {
+    emailError.style.display = 'block';
+    isValid = false;
+  } else emailError.style.display = 'none';
 
-    // Validate password
-    if (password === '') {
-        passwordError.style.display = 'block';
-        isValid = false;
-    } else {
-        passwordError.style.display = 'none';
-    }
+  if (password === '') {
+    passwordError.style.display = 'block';
+    isValid = false;
+  } else passwordError.style.display = 'none';
 
-    if (isValid) {
-        loginLoading.style.display = 'block';
-        loginError.style.display = 'none';
+  if (isValid) {
+    loginLoading.style.display = 'block';
+    loginError.style.display = 'none';
 
-        // Firebase login
-        auth.signInWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                // Signed in
-                console.log("Login successful:", userCredential.user.email);
-
-                // --- THIS IS THE CHANGE ---
-                // Open dashboard.html in a new tab
-                window.open('dashboard.html', '_blank');
-                // -------------------------
-
-                loginLoading.style.display = 'none';
-                loginFormElement.reset();
-            })
-            .catch((error) => {
-                loginLoading.style.display = 'none';
-                loginError.style.display = 'block';
-                console.error("Login error:", error);
-            });
-    }
+    auth.signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        console.log("Login successful:", userCredential.user.email);
+        window.open('dashboard.html', '_blank');
+        loginLoading.style.display = 'none';
+        loginFormElement.reset();
+      })
+      .catch((error) => {
+        loginLoading.style.display = 'none';
+        loginError.style.display = 'block';
+        console.error("Login error:", error);
+      });
+  }
 });
 
-// Register form validation and submission
+// Signup form
 registerFormElement.addEventListener('submit', (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const username = document.getElementById('reg-username').value.trim();
-    const email = document.getElementById('reg-email').value.trim();
-    const password = document.getElementById('reg-password').value;
-    const confirmPassword = document.getElementById('reg-confirm-password').value;
+  const username = document.getElementById('reg-username').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirmPassword = document.getElementById('reg-confirm-password').value;
 
-    const usernameError = document.getElementById('reg-username-error');
-    const emailError = document.getElementById('reg-email-error');
-    const passwordError = document.getElementById('reg-password-error');
-    const confirmPasswordError = document.getElementById('reg-confirm-password-error');
+  const usernameError = document.getElementById('reg-username-error');
+  const emailError = document.getElementById('reg-email-error');
+  const passwordError = document.getElementById('reg-password-error');
+  const confirmPasswordError = document.getElementById('reg-confirm-password-error');
 
-    let isValid = true;
+  let isValid = true;
 
-    // Validate username
-    if (username.length < 2) {
-        usernameError.style.display = 'block';
-        isValid = false;
-    } else {
-        usernameError.style.display = 'none';
-    }
+  if (username.length < 2) {
+    usernameError.style.display = 'block';
+    isValid = false;
+  } else usernameError.style.display = 'none';
 
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        emailError.style.display = 'block';
-        isValid = false;
-    } else {
-        emailError.style.display = 'none';
-    }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    emailError.style.display = 'block';
+    isValid = false;
+  } else emailError.style.display = 'none';
 
-    // Validate password
-    if (password.length < 6) {
-        passwordError.style.display = 'block';
-        isValid = false;
-    } else {
-        passwordError.style.display = 'none';
-    }
+  if (password.length < 6) {
+    passwordError.style.display = 'block';
+    isValid = false;
+  } else passwordError.style.display = 'none';
 
-    // Validate confirm password
-    if (password !== confirmPassword) {
-        confirmPasswordError.style.display = 'block';
-        isValid = false;
-    } else {
-        confirmPasswordError.style.display = 'none';
-    }
+  if (password !== confirmPassword) {
+    confirmPasswordError.style.display = 'block';
+    isValid = false;
+  } else confirmPasswordError.style.display = 'none';
 
-    if (isValid) {
-        registerLoading.style.display = 'block';
-        registerError.style.display = 'none';
+  if (isValid) {
+    registerLoading.style.display = 'block';
+    registerError.style.display = 'none';
 
-        // Firebase registration
-        auth.createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-
-                // Update user profile with display name
-                return user.updateProfile({
-                    displayName: username
-                }).then(() => {
-                    // Show success message and switch to login form
-                    registerForm.style.display = 'none';
-                    loginForm.style.display = 'block';
-                    registerSuccess.style.display = 'block';
-                    registerFormElement.reset();
-                    registerLoading.style.display = 'none';
-                });
-            })
-            .catch((error) => {
-                registerLoading.style.display = 'none';
-                registerError.style.display = 'block';
-                // Handle specific errors
-                if (error.code === 'auth/email-already-in-use') {
-                    registerError.textContent = 'This email is already in use.';
-                } else {
-                    registerError.textContent = 'Error creating account. Please try again.';
-                }
-                console.error("Registration error:", error);
-            });
-    }
-})
+    auth.createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        return user.updateProfile({ displayName: username }).then(() => {
+          fadeSwitch(registerForm, loginForm);
+          registerSuccess.style.display = 'block';
+          registerFormElement.reset();
+          registerLoading.style.display = 'none';
+        });
+      })
+      .catch((error) => {
+        registerLoading.style.display = 'none';
+        registerError.style.display = 'block';
+        if (error.code === 'auth/email-already-in-use') {
+          registerError.textContent = 'This email is already in use.';
+        } else {
+          registerError.textContent = 'Error creating account. Please try again.';
+        }
+        console.error("Registration error:", error);
+      });
+  }
+});
